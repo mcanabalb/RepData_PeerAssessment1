@@ -11,19 +11,68 @@ output: html_document
 
 0. Load R-libraries and set Locale "English"
 
-```{r echo = TRUE}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(ggplot2)
 Sys.setlocale("LC_ALL","English")
 ```
 
+```
+## [1] "LC_COLLATE=English_United States.1252;LC_CTYPE=English_United States.1252;LC_MONETARY=English_United States.1252;LC_NUMERIC=C;LC_TIME=English_United States.1252"
+```
+
 1. Load the data
 
-```{r echo = TRUE}
+
+```r
 dat = read.csv('activity.csv', header = T)
 names(dat)
+```
+
+```
+## [1] "steps"    "date"     "interval"
+```
+
+```r
 str(dat)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 head(dat)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 
 2. Process/transform the data (if necessary) into a format suitable for your analysis
@@ -36,7 +85,8 @@ head(dat)
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 
-```{r echo = TRUE}
+
+```r
 dat_tbl <- dat %>% 
            group_by(date) %>% 
            summarise(total_steps = sum(steps, na.rm = TRUE))
@@ -59,6 +109,12 @@ h1 <- ggplot(dat_tbl, aes(total_steps)) +
 h1
 ```
 
+```
+## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 
 ### What is the average daily activity pattern?
 
@@ -66,7 +122,8 @@ h1
 2.  Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
-```{r echo = TRUE}
+
+```r
 dat_tbl_interval <- dat %>% 
                     group_by(interval) %>% 
                     summarise(average_steps = mean(steps, na.rm = TRUE))
@@ -86,11 +143,18 @@ h2 <- ggplot(dat_tbl_interval, aes(interval, average_steps)) +
 h2
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
 ### Imputing Missing Values
 
 1. Calculate & Report The Number of Missing Values
-```{r echo = TRUE}
+
+```r
 sum(is.na(dat$steps))
+```
+
+```
+## [1] 2304
 ```
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
@@ -98,7 +162,8 @@ sum(is.na(dat$steps))
 **I will use the mean**
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
-```{r echo = TRUE}
+
+```r
 dat_tbl_better <- merge(dat, dat_tbl_interval, by = "interval")
 
 #create new dataset that replaces NAs with average values of interval
@@ -113,8 +178,8 @@ dat_tbl_filled <- dat_tbl_better %>%
 
 4.  Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r echo = TRUE}
 
+```r
 lb1 <- paste("Mean:",
              round(mean(dat_tbl_filled$total_steps),0), 
              " Median:", 
@@ -133,6 +198,12 @@ h3 <- ggplot(dat_tbl_filled, aes(total_steps)) +
 h3
 ```
 
+```
+## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
 **Answer To Question:**
 The mean and the median are now almost the same after replacing missing values with the mean value.
 
@@ -140,7 +211,8 @@ The mean and the median are now almost the same after replacing missing values w
 
 1.  Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r echo = TRUE}
+
+```r
 dat_tbl_day <- dat_tbl_better %>% 
                mutate(dayname = weekdays(as.Date(date))) %>% 
                mutate(daytype = ifelse(dayname %in% c('Saturday', 'Sunday'), "weekend", "weekday")) %>%  
@@ -149,7 +221,8 @@ dat_tbl_day <- dat_tbl_better %>%
 ```
 
 2. Plot both levels
-```{r echo = TRUE}
+
+```r
 h4 <- ggplot(data = dat_tbl_day, aes(x=interval, y=average_steps)) +
       facet_grid(daytype ~ . ) + 
       geom_line() + 
@@ -158,3 +231,5 @@ h4 <- ggplot(data = dat_tbl_day, aes(x=interval, y=average_steps)) +
       ylab("Number of Steps")
 h4
 ```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
